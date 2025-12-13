@@ -1,4 +1,4 @@
 # streamlit
-plotly
-matplotlib
-scipy
+plotly==6.5.0
+matplotlib==3.10.8
+scipy==1.16.3
