@@ -95,7 +95,7 @@ class BootstrapApp:
         )
 
         if data_mode == "Manual Entry":
-            default_val = "25, 30, 28, 35, 29, 31, 24, 26, 30, 150"  # Included outlier
+            default_val = "85, 90, 78, 88, 92, 82, 76, 91, 20"
             input_str = st.sidebar.text_area(
                 "Enter values (comma separated)", value=default_val, height=100
             )
