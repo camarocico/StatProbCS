@@ -266,7 +266,7 @@ def main():
             margin=dict(l=0, r=0, t=0, b=0),
             height=350,
         )
-        st.plotly_chart(trace_fig, use_container_width=True)
+        st.plotly_chart(trace_fig, width="stretch")
 
         st.subheader("Posterior Distribution")
         st.markdown("Comparing MCMC samples (Histogram) vs. Analytical Solution.")
@@ -317,7 +317,7 @@ def main():
             margin=dict(l=0, r=0, t=0, b=0),
             height=350,
         )
-        st.plotly_chart(hist_fig, use_container_width=True)
+        st.plotly_chart(hist_fig, width="stretch")
 
     with col2:
         st.markdown("### Diagnostics & Results")
