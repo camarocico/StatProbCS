@@ -7,7 +7,7 @@ from typing import List
 
 # --- Configuration & Styling ---
 st.set_page_config(
-    page_title="Bayesian Inference: The Magician's Deck", page_icon="🃏", layout="wide"
+    page_title="Bayesian Inference: The Magician's Honest Trick", page_icon="🃏", layout="wide"
 )
 
 # --- Logic Core: Bayesian Model ---
