@@ -228,7 +228,7 @@ def main():
     post_pdf = model.get_pdf(post_alpha, post_beta, x)
 
     # --- UI Layout ---
-    st.title("Conjugate Priors: Beta-Binomial Summaries")
+    st.title("Coins Again and Beta-Binomial")
 
     # Top Metrics
     m1, m2, m3, m4 = st.columns(4)
