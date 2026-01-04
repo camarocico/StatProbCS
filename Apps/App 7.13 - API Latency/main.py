@@ -22,6 +22,7 @@ class TestParameters:
 class ZTestCalculator:
     """
     Handles the statistical logic for a two-tailed Z-test.
+    Independent of UI.
     """
 
     def __init__(self, params: TestParameters):
@@ -43,6 +44,7 @@ class ZTestCalculator:
         return 2 * (1 - stats.norm.cdf(abs(self.z_score)))
 
     def get_critical_region_bounds(self) -> Tuple[float, float]:
+        """Returns the raw X values where rejection regions start."""
         margin_of_error = self.z_critical * self.se
         return (self.params.mu_0 - margin_of_error, self.params.mu_0 + margin_of_error)
 
@@ -60,13 +62,18 @@ class StreamlitHypothesisApp:
 
     def __init__(self):
         st.set_page_config(
-            page_title="DevOps Hypothesis Test", layout="centered", page_icon="🖥️"
+            page_title="DevOps Hypothesis Test",
+            layout="centered",
+            page_icon="Fig_07_01",
         )
+        # Colors extracted from your Fig_07_01.py example
         self.colors = {
-            "h0": "#2c3e50",  # Dark Blue
-            "reject": "#e74c3c",  # Red
-            "accept": "#27ae60",  # Green
-            "obs_line": "#2980b9",  # Blue
+            "rejection_fill": "salmon",
+            "rejection_line": "red",
+            "accept_fill": "darkcyan",
+            "accept_line": "green",
+            "dist_line": "blue",
+            "statistic": "purple",
         }
 
     def run(self):
@@ -91,7 +98,7 @@ class StreamlitHypothesisApp:
             mu_0 = st.number_input("Target Latency (ms)", value=50.0, step=0.1)
             n = st.number_input("Sample Size (n)", value=64, step=1)
             alpha = st.selectbox(
-                "Significance Level ($\\alpha$)", [0.01, 0.05, 0.10], index=0
+                "Significance Level ($\\alpha$)", [0.01, 0.05, 0.10], index=1
             )
 
         st.sidebar.header("2. Observations")
@@ -116,114 +123,125 @@ class StreamlitHypothesisApp:
         return TestParameters(mu_0, sample_mean, sigma, int(n), float(alpha))
 
     def _render_visualization(self, calc: ZTestCalculator):
-        """Plots the Sampling Distribution using Plotly."""
-
+        """
+        Plots the distribution matching the style of Fig_07_01.py
+        """
         mu = calc.params.mu_0
         se = calc.se
         x_left_crit, x_right_crit = calc.get_critical_region_bounds()
 
-        # Define x range
+        # Define x range for the plot
         x = np.linspace(mu - 4 * se, mu + 4 * se, 1000)
         y = stats.norm.pdf(x, mu, se)
 
+        # Define specific regions for shading (matching the example logic)
+        x_fill_left = np.linspace(x[0], x_left_crit, 100)
+        y_fill_left = stats.norm.pdf(x_fill_left, mu, se)
+
+        x_fill_right = np.linspace(x_right_crit, x[-1], 100)
+        y_fill_right = stats.norm.pdf(x_fill_right, mu, se)
+
+        x_fill_acceptance = np.linspace(x_left_crit, x_right_crit, 100)
+        y_fill_acceptance = stats.norm.pdf(x_fill_acceptance, mu, se)
+
         fig = go.Figure()
 
-        # 1. Main Null Distribution Curve
+        # 1. Left Rejection Region (Salmon)
+        fig.add_trace(
+            go.Scatter(
+                x=x_fill_left,
+                y=y_fill_left,
+                fill="tozeroy",
+                fillcolor=self.colors["rejection_fill"],
+                name="Left Rejection Region",
+                mode="lines",
+                line=dict(color=self.colors["rejection_line"], width=2),
+            )
+        )
+
+        # 2. Right Rejection Region (Salmon)
+        fig.add_trace(
+            go.Scatter(
+                x=x_fill_right,
+                y=y_fill_right,
+                fill="tozeroy",
+                fillcolor=self.colors["rejection_fill"],
+                name="Right Rejection Region",
+                mode="lines",
+                line=dict(color=self.colors["rejection_line"], width=2),
+            )
+        )
+
+        # 3. Acceptance Region (Dark Cyan)
+        fig.add_trace(
+            go.Scatter(
+                x=x_fill_acceptance,
+                y=y_fill_acceptance,
+                fill="tozeroy",
+                fillcolor=self.colors["accept_fill"],
+                name="Non-Rejection Region",
+                mode="lines",
+                line=dict(color=self.colors["accept_line"], width=2),
+            )
+        )
+
+        # 4. The Standard Normal Line (Blue)
         fig.add_trace(
             go.Scatter(
                 x=x,
                 y=y,
+                name="Normal Distribution",
                 mode="lines",
-                name="Null Distribution",
-                line=dict(color=self.colors["h0"], width=3),
-                hoverinfo="x+y",
+                opacity=0.8,
+                line=dict(color=self.colors["dist_line"], width=2),
             )
         )
 
-        # 2. Right Rejection Region (Shaded Area)
-        x_right = np.linspace(x_right_crit, mu + 4 * se, 200)
-        y_right = stats.norm.pdf(x_right, mu, se)
-        # Close polygon for fill
-        x_right_poly = np.concatenate([x_right, [x_right[-1], x_right[0]]])
-        y_right_poly = np.concatenate([y_right, [0, 0]])
-
-        fig.add_trace(
-            go.Scatter(
-                x=x_right,
-                y=y_right,
-                mode="lines",
-                line=dict(width=0),
-                fill="tozeroy",
-                fillcolor="rgba(231, 76, 60, 0.3)",
-                name="Rejection Region",
-                hoverinfo="skip",
-            )
-        )
-
-        # 3. Left Rejection Region (Shaded Area)
-        x_left = np.linspace(mu - 4 * se, x_left_crit, 200)
-        y_left = stats.norm.pdf(x_left, mu, se)
-
-        fig.add_trace(
-            go.Scatter(
-                x=x_left,
-                y=y_left,
-                mode="lines",
-                line=dict(width=0),
-                fill="tozeroy",
-                fillcolor="rgba(231, 76, 60, 0.3)",
-                name="Rejection Region",
-                showlegend=False,
-                hoverinfo="skip",
-            )
-        )
-
-        # 4. Vertical Line for Sample Mean
-        obs_color = (
-            self.colors["reject"] if calc.is_rejected() else self.colors["accept"]
-        )
-
+        # 5. The Observed Statistic (Purple Dashed Line)
+        # Using add_vline to match the provided example style
         fig.add_vline(
             x=calc.params.sample_mean,
-            line_width=4,
+            line_width=2,
             line_dash="dash",
-            line_color=obs_color,
-            annotation_text=f"Observed: {calc.params.sample_mean:.1f}",
-            annotation_position="top right",
+            line_color=self.colors["statistic"],
+            annotation_text=f"Observed Mean = {calc.params.sample_mean:.1f}",
+            annotation_position="top left",
             annotation_font_size=14,
+            annotation_font_color=self.colors["statistic"],
+            annotation_textangle=270,
         )
 
-        # Layout styling
+        # Layout styling matching the reference
         fig.update_layout(
-            title="Sampling Distribution of the Mean",
-            title_font_size=20,
-            xaxis_title="Latency (ms)",
-            yaxis_title="Probability Density",
-            template="plotly_white",
-            height=550,
-            showlegend=True,
-            legend=dict(
-                orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
+            title=dict(
+                text=f"Rejection and Acceptance Regions (Confidence level = {1 - calc.params.alpha:.2f})",
+                font=dict(size=18),
             ),
+            xaxis_title=dict(text="Latency (ms)", font=dict(size=16)),
+            yaxis_title=dict(text="Density", font=dict(size=16)),
+            legend=dict(
+                yanchor="top", y=0.99, xanchor="left", x=0.01, font=dict(size=14)
+            ),
+            template="plotly_white",
+            height=600,
+            margin=dict(t=50, b=50, l=50, r=50),
         )
 
         # --- High-Res Download Configuration ---
-        # This config dict tells Plotly how to handle the "camera" icon click
         config = {
             "toImageButtonOptions": {
-                "format": "png",  # one of png, svg, jpeg, webp
-                "filename": "hypothesis_test_high_res",
-                "height": 1080,  # Set vertical resolution (e.g., 1080p)
-                "width": 1920,  # Set horizontal resolution (e.g., 1920p)
-                "scale": 2,  # Upscale factor (2x ensures crisp text on high-res)
+                "format": "png",
+                "filename": "hypothesis_test_result",
+                "height": 1080,
+                "width": 1920,
+                "scale": 2,
             },
-            "displayModeBar": True,  # Ensure the toolbar is visible
+            "displayModeBar": True,
         }
 
-        # Plotly chart with config
         st.plotly_chart(fig, use_container_width=True, config=config)
         st.caption(
-            "📷 **Tip:** Hover over the chart and click the **camera icon** in the top-right toolbar to download a High-Res (1920x1080) PNG."
+            "📷 **Tip:** Hover over the chart and click the **camera icon** to download a High-Res PNG."
         )
 
     def _render_results(self, calc: ZTestCalculator):
