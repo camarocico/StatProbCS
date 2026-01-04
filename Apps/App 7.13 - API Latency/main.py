@@ -5,7 +5,7 @@ from scipy import stats
 from dataclasses import dataclass
 from typing import Tuple
 
-# --- 1. Data Models & Logic Layer (Unchanged) ---
+# --- 1. Data Models & Logic Layer ---
 
 
 @dataclass
@@ -135,7 +135,7 @@ class StreamlitHypothesisApp:
                 y=y,
                 mode="lines",
                 name="Null Distribution",
-                line=dict(color=self.colors["h0"], width=2),
+                line=dict(color=self.colors["h0"], width=3),
                 hoverinfo="x+y",
             )
         )
@@ -143,7 +143,7 @@ class StreamlitHypothesisApp:
         # 2. Right Rejection Region (Shaded Area)
         x_right = np.linspace(x_right_crit, mu + 4 * se, 200)
         y_right = stats.norm.pdf(x_right, mu, se)
-        # Add a zero at the end to close the polygon nicely for filling
+        # Close polygon for fill
         x_right_poly = np.concatenate([x_right, [x_right[-1], x_right[0]]])
         y_right_poly = np.concatenate([y_right, [0, 0]])
 
@@ -154,8 +154,8 @@ class StreamlitHypothesisApp:
                 mode="lines",
                 line=dict(width=0),
                 fill="tozeroy",
-                fillcolor="rgba(231, 76, 60, 0.3)",  # Red with opacity
-                name="Rejection Region (> Critical)",
+                fillcolor="rgba(231, 76, 60, 0.3)",
+                name="Rejection Region",
                 hoverinfo="skip",
             )
         )
@@ -172,7 +172,7 @@ class StreamlitHypothesisApp:
                 line=dict(width=0),
                 fill="tozeroy",
                 fillcolor="rgba(231, 76, 60, 0.3)",
-                name="Rejection Region (< Critical)",
+                name="Rejection Region",
                 showlegend=False,
                 hoverinfo="skip",
             )
@@ -185,28 +185,46 @@ class StreamlitHypothesisApp:
 
         fig.add_vline(
             x=calc.params.sample_mean,
-            line_width=3,
+            line_width=4,
             line_dash="dash",
             line_color=obs_color,
             annotation_text=f"Observed: {calc.params.sample_mean:.1f}",
             annotation_position="top right",
+            annotation_font_size=14,
         )
 
         # Layout styling
         fig.update_layout(
             title="Sampling Distribution of the Mean",
+            title_font_size=20,
             xaxis_title="Latency (ms)",
             yaxis_title="Probability Density",
             template="plotly_white",
-            height=500,
+            height=550,
             showlegend=True,
             legend=dict(
                 orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
             ),
         )
 
-        # Plotly chart with built-in download button enabled in the modebar
-        st.plotly_chart(fig, use_container_width=True)
+        # --- High-Res Download Configuration ---
+        # This config dict tells Plotly how to handle the "camera" icon click
+        config = {
+            "toImageButtonOptions": {
+                "format": "png",  # one of png, svg, jpeg, webp
+                "filename": "hypothesis_test_high_res",
+                "height": 1080,  # Set vertical resolution (e.g., 1080p)
+                "width": 1920,  # Set horizontal resolution (e.g., 1920p)
+                "scale": 2,  # Upscale factor (2x ensures crisp text on high-res)
+            },
+            "displayModeBar": True,  # Ensure the toolbar is visible
+        }
+
+        # Plotly chart with config
+        st.plotly_chart(fig, use_container_width=True, config=config)
+        st.caption(
+            "📷 **Tip:** Hover over the chart and click the **camera icon** in the top-right toolbar to download a High-Res (1920x1080) PNG."
+        )
 
     def _render_results(self, calc: ZTestCalculator):
         st.subheader("Statistical Decision")
