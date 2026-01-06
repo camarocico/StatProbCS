@@ -145,18 +145,22 @@ def main():
     # --- Sidebar: Configuration ---
     st.sidebar.header("Configuration")
 
-    include_rogue = st.sidebar.checkbox("Include Rogue Supplier ($H_r$)?", value=False)
+    include_rogue = st.sidebar.checkbox("Include Rogue Machine ($H_r$)?", value=False)
     st.sidebar.divider()
 
     st.sidebar.subheader("1. Defect Rates")
     # Using small epsilon to strictly avoid log(0) if user sets rate to 0.0 or 1.0
-    rate_b = st.sidebar.slider("Bad Supplier Rate ($H_b$)", 0.01, 0.99, 0.66, 0.01)
-    rate_g = st.sidebar.slider("Good Supplier Rate ($H_g$)", 0.01, 0.99, 0.16, 0.01)
+    rate_b = st.sidebar.number_input(
+        "Bad Machine Rate ($H_b$)", start=0.01, end=0.99, value=0.66, step=0.01
+    )
+    rate_g = st.sidebar.number_input(
+        "Good Machine Rate ($H_g$)", 0.01, 0.99, 0.16, 0.01
+    )
 
     rate_r = 0.95
     if include_rogue:
-        rate_r = st.sidebar.slider(
-            "Rogue Supplier Rate ($H_r$)", 0.01, 0.99, 0.95, 0.01
+        rate_r = st.sidebar.number_input(
+            "Rogue Machine Rate ($H_r$)", 0.01, 0.99, 0.95, 0.01
         )
 
     st.sidebar.divider()
