@@ -151,16 +151,28 @@ def main():
     st.sidebar.subheader("1. Defect Rates")
     # Using small epsilon to strictly avoid log(0) if user sets rate to 0.0 or 1.0
     rate_b = st.sidebar.number_input(
-        "Bad Machine Rate ($H_b$)", start=0.01, end=0.99, value=0.66, step=0.01
+        "Bad Machine Rate ($H_b$)",
+        min_value=0.01,
+        max_value=0.99,
+        value=0.66,
+        step=0.01,
     )
     rate_g = st.sidebar.number_input(
-        "Good Machine Rate ($H_g$)", 0.01, 0.99, 0.16, 0.01
+        "Good Machine Rate ($H_g$)",
+        min_value=0.01,
+        max_value=0.99,
+        value=0.16,
+        step=0.01,
     )
 
     rate_r = 0.95
     if include_rogue:
         rate_r = st.sidebar.number_input(
-            "Rogue Machine Rate ($H_r$)", 0.01, 0.99, 0.95, 0.01
+            "Rogue Machine Rate ($H_r$)",
+            min_value=0.01,
+            max_value=0.99,
+            value=0.95,
+            step=0.01,
         )
 
     st.sidebar.divider()
