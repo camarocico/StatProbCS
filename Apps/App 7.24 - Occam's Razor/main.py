@@ -54,7 +54,7 @@ def plot_distributions(measured_val, sigma, prior_range):
             x=x,
             y=likelihood,
             mode="lines",
-            name="Likelihood $\mathcal{L}(\mu)$",
+            name="Likelihood $\\mathcal{L}(\\mu)$",
             fill="tozeroy",
             line=dict(color="#636EFA"),
             opacity=0.3,
@@ -67,7 +67,7 @@ def plot_distributions(measured_val, sigma, prior_range):
             x=x,
             y=prior_m2,
             mode="lines",
-            name="Prior $P(\mu|M_2)$",
+            name="Prior $P(\\mu|M_2)$",
             line=dict(color="#EF553B", dash="dash"),
             hoverinfo="skip",
         )
@@ -88,7 +88,7 @@ def plot_distributions(measured_val, sigma, prior_range):
 
     fig.update_layout(
         title="Parameter Space View",
-        xaxis_title="Parameter Value ($\mu$)",
+        xaxis_title="Parameter Value ($\\mu$)",
         yaxis_title="Probability Density",
         template="plotly_white",
         height=350,
@@ -138,7 +138,7 @@ def plot_probability_shift(prior_m1, prior_m2, post_m1, post_m2):
 def main():
     st.title("Bayesian Model Comparison: Priors & Posteriors")
     st.markdown(
-        "Compare a **Simple Model ($M_1$, $\mu=0$)** vs a **Complex Model ($M_2$, $\mu \in [-I, I]$)**."
+        "Compare a **Simple Model ($M_1$, $\\mu=0$)** vs a **Complex Model ($M_2$, $\\mu \\in [-I, I]$)**."
     )
 
     # --- Sidebar ---
@@ -147,7 +147,7 @@ def main():
         "Measured Value ($D$)", -10.0, 10.0, 0.0, step=0.1
     )
     sigma = st.sidebar.number_input(
-        "Measurement Noise ($\sigma$)", 0.1, 5.0, 0.5, step=0.1
+        "Measurement Noise ($\\sigma$)", 0.1, 5.0, 0.5, step=0.1
     )
     prior_range = st.sidebar.number_input(
         "M2 Prior Range ($I$)", 1.0, 100.0, 10.0, step=1.0
