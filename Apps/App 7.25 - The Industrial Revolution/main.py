@@ -10,7 +10,9 @@ def to_db(p: float) -> float:
     """Convert probability to decibels safely."""
     if p <= 0:
         return -np.inf
-    return 10.0 * np.log10(p)
+    if p >= 1:
+        return np.inf
+    return 10.0 * np.log10(p / (1 - p))
 
 
 def from_db(db: float) -> float:
@@ -113,6 +115,7 @@ def compute_display_metrics(
         # elif p <= 1e-9:
         #     evidences.append(-100.0)  # Floor at -100 dB
         # else:
+        print(p / (1.0 - p))
         evidences.append(10.0 * np.log10(p / (1.0 - p)))
 
     return evidences, probs
