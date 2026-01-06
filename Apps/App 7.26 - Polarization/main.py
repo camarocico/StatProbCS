@@ -1,8 +1,9 @@
-import streamlit as st
-import plotly.graph_objects as go
-import numpy as np
-from typing import Dict, List
 from dataclasses import dataclass
+from typing import List
+
+import numpy as np
+import plotly.graph_objects as go
+import streamlit as st
 
 # --- Configuration & Styling ---
 st.set_page_config(

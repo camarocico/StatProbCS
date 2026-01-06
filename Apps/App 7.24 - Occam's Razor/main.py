@@ -244,7 +244,7 @@ def main():
         \underbrace{\frac{P(M_1)}{P(M_2)}}_{\text{Prior Odds}}
         """)
 
-        st.write(f"**Calculation:**")
+        st.write("**Calculation:**")
         st.write(
             f"Posterior Odds = {bayes_factor_12:.2f} (Data) $\\times$ {prior_odds_12:.2f} (Belief)"
         )
